@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if 'username' in session %}
+    <a href="{{url_for('new_category')}}" class="btn btn-success">Add a new category</a>
+  {% endif %}
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert" style="margin-top: 1rem;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="row" style="margin-top: 12px;">
+    <div class="col-6">
+      <h4>{{ categories_title }}</h4>
+      {% if categories %}
+        {% for c in categories %}
+          <p><a href="{{url_for('show_items', category_name=c.name)}}">{{ c.name }}</a>
+        {% endfor %}
+      {% else %}
+        <div class="alert alert-warning" role="alert">
+          No Categories Found!
+        </div>
+      {% endif %}
+    </div>
+    <div class="col-6">
+      <h4>{{ items_title }}</h4>
+      {% if items %}
+        {% for i in items %}
+          <p><a href="{{url_for('show_item', category_name=i.category.name, item_title=i.title)}}">{{ i.title }}</a> ({{ i.category.name }})</p>
+        {% endfor %}
+      {% else %}
+        <div class="alert alert-warning" role="alert">
+          No Items Found!
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
