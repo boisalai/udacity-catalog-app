@@ -1,28 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="description" content="Catalog App">
     <meta name="author" content="Alain Boisvert">
-
-    <!-- Title -->
-    {% if title %}
-    <title>{{ title }}</title>
-    {% else %}
     <title>Catalog App</title>
-    {% endif %}
     
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" 
+    <link rel="stylesheet" 
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" 
       integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" 
       crossorigin="anonymous">
+
     <!-- Others styles -->
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
-      <a class="navbar-brand" href="{{url_for('show_categories')}}">{{ title }}</a>
+    <!-- Navbar -->
+    <nav class="navbar navbar-inverse bg-inverse navbar-expand-lg" style="background-color: #292B2C;">
+      <a class="navbar-brand" href="{{url_for('show_categories')}}" style="color: #FFF;">Catalog App</a>
       <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -30,28 +31,62 @@
       <div class="navbar-collapse collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a class="nav-link" href="https://github.com/boisalai" target="_blank">GitHub</a>
+            <a class="nav-link" href="{{url_for('show_categories')}}" style="color: #FFF;">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{url_for('about')}}" style="color: #FFF;">About</a>
           </li>
         </ul>
 
         <form class="form-inline my-2 my-lg-0">
           {% if 'username' not in session %}
-            <a href="{{url_for('show_login')}}" class="btn btn-primary">Login</a>
+            <a href="{{url_for('show_login')}}" class="btn btn-danger">Login</a>
           {% else %}
-            <a href="{{url_for('disconnect')}}" class="btn btn-primary">Logout</a>
+            <a href="#" data-toggle="popover" data-trigger="focus" 
+              title="Authentication" 
+              data-content="{{ session['username'] }} ({{ session['email'] }})">
+              <img src="{{ session['picture'] }}" class="picture">
+            </a>
+            <a href="{{url_for('disconnect')}}" class="btn btn-danger">Logout</a>
           {% endif %}
         </form>
       </div>
     </nav>
     
-    <div class="container-fluid" style="margin-top: 1rem; max-width: 600px;">
+    <div class="container-fluid" style="margin-top: 1rem;">
       <!-- Content here -->
       {% block content %}{% endblock %}
       
+      <!-- Footer -->
       <hr>
-      <p><small><strong>session=</strong>{{session}}</small></p>
+      <p>
+        <small>
+          {% if 'username' in session %}
+            You are currently signed in ({{ session['username'] }}, {{ session['email'] }}).
+          {% else %}
+            You are not currently signed in. 
+            Please <a href="{{url_for('show_login')}}">login</a> to be able 
+            to add, update, or delete item information.
+          {% endif %}
+        </small>
+      </p>
+
+      <!-- Show session -->
+      <hr>
+      <p>
+        <small>
+          <strong>session=</strong>
+          {{session}}
+        </small>
+      </p>
     </div>
     
+    <script>
+      $(function() {
+        $('[data-toggle="popover"]').popover()
+      });
+    </script>
+
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" 
       integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" 

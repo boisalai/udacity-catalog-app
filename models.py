@@ -19,8 +19,8 @@ class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key = True)
-    name = Column(String(250), nullable = False)
-    email = Column(String(250), nullable = False, unique = True)
+    name = Column(String(80), nullable = False)
+    email = Column(String(80), nullable = False, unique = True)
     picture = Column(String(250))
     
     def __init__(self, name, email, picture):
@@ -48,7 +48,7 @@ class Category(Base):
     __tablename__ = "category"
 
     id = Column(Integer, primary_key = True)
-    name = Column(String(250), nullable = False, index = True)
+    name = Column(String(80), nullable = False, index = True)
     created_date = Column(DateTime, default = datetime.utcnow, nullable = False)
     updated_date = Column(DateTime, default = datetime.utcnow, onupdate = datetime.utcnow, nullable = False)
     user_id = Column(Integer, ForeignKey("user.id"))
@@ -68,7 +68,10 @@ class Category(Base):
         """Return object data in easily serializeable format."""
         return {
             "id": self.id,
-            "name": self.name
+            "name": self.name,
+            "created_date": self.created_date,
+            "updated_date": self.updated_date,
+            "user_id": self.user_id
         }
 
 class Item(Base):
@@ -103,7 +106,10 @@ class Item(Base):
             "id": self.id,
             "title": self.title,
             "description": self.description,
-            "category_id": self.category_id
+            "created_date": self.created_date,
+            "updated_date": self.updated_date,
+            "category_id": self.category_id,
+            "user_id": self.user_id
         }
 
 engine = create_engine("sqlite:///catalog.db")

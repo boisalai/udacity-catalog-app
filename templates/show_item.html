@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert" style="margin-top: 1rem;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <h2>{{ item.title }}</h2>
+  <p><strong>Description:</strong> {{ item.description }}</p>
+  <p><strong>Category:</strong> {{ item.category.name }}</p>
+  <hr style="max-width: 300px; text-align: left; margin-left: 0">
+  <p>
+    <small>
+      <strong>Created by:</strong> {{ item.user.name }} ({{ item.user.email }}).<br>
+      <strong>Created at:</strong> {{ item.created_date.strftime('%Y-%m-%d %-H:%M:%S') }} UTC.<br>
+      <strong>Last modified at:</strong> {{ item.updated_date.strftime('%Y-%m-%d %-H:%M:%S') }} UTC.<br>
+    </small>
+  </p>
+
+  {% if 'user_id' in session and item.user_id == session.user_id %}
+    <div style="text-align: right; white-space: nowrap;">
+      <a href="{{url_for('edit_item', category_name = item.category.name, item_title = item.title)}}" 
+        class="btn btn-warning btn-sm">Edit</a>
+      <a href="{{url_for('delete_item', category_name = item.category.name, item_title = item.title)}}" 
+        class="btn btn-danger btn-sm">Delete</a>
+    </div>
+  {% elif 'user_id' in session %}
+    <div id="oups" style="text-align: right; white-space: nowrap;">
+      <br>
+      <a href="#" class="btn btn-outline-warning btn-sm" 
+        data-toggle="popover" data-trigger="focus" 
+        title="Authorization status" 
+        data-content="You are not allowed to edit this item. It belongs to {{ item.user.name }}.">Edit</a>
+      <a href="#" class="btn btn-outline-danger btn-sm"
+        data-toggle="popover" data-trigger="focus" 
+        title="Authorization status" 
+        data-content="You are not allowed to delete this item. It belongs to {{ item.user.name }}.">Delete</a>
+    </div>
+  {% endif %}
+{% endblock %}

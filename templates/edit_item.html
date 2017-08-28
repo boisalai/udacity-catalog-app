@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Edit Item</h2>
+  
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert" style="margin-top: 1rem;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div id="alert" class="alert alert-danger" role="alert" style="display: none;">
+    <strong>Oups!</strong> Change a few things up and try submitting again.
+  </div>
+
+  <form name="myForm" action="{{url_for('edit_item', category_name = item.category.name, item_title = item.title)}}" method="POST" onsubmit="return validateForm();">
+    <div class="form-group">
+      <label for="title">Title *</label>
+      <input name="title" type="text" size="80" class="form-control" value="{{item.title}}">
+      <small id="titleHelp" class="form-text text-danger" style="display: none;">This field marked by an asterisk must be filled out.</small>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description *</label>
+      <textarea name="description" class="form-control" rows="6">{{ item.description }}</textarea>
+      <small id="descriptionHelp" class="form-text text-danger" style="display: none;">This field marked by an asterisk must be filled out.</small>
+    </div>
+
+    <div class="form-group" style="display: none;">
+      <label for="category_name">Category</label>
+      <input name="category_name" id="category_name" type="text" size="80" class="form-control" value="{{item.category.name}}">
+    </div>
+
+    <div class="input-group form-group" style="margin-bottom: 0">
+      <div class="input-group-btn">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Category *
+        </button>
+        <div class="dropdown-menu" id="category_menu">
+          {% for c in categories %}
+            <a class="dropdown-item {% if c.id == item.category_id %}active{% endif %}" href="#">{{ c.name }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      <input id="category_text" type="text" class="form-control" aria-label="Text input with dropdown button"
+        value="{{item.category.name}}">
+    </div>
+
+    <small id="categoryHelp" class="form-text text-danger" style="display: none;">This field marked by an asterisk must be filled out.</small>
+
+    <p>
+      <small>
+        <b>Created by:</b> {{ item.user.name }} ({{ item.user.email }})<br>
+        <b>Created at:</b> {{ item.created_date.strftime('%Y-%m-%d %-H:%M:%S') }} UTC<br>
+        <b>Last modified at:</b> {{ item.updated_date.strftime('%Y-%m-%d %-H:%M:%S') }} UTC<br>
+      </small>
+    </p>
+
+    <script>
+      $(document).ready(function(){
+        $('#category_menu a').click(function() {
+          $("#category_menu a").removeClass("active")
+          $(this).addClass('active'); 
+          $("#category_text").val($(this).text())
+          $("#category_name").val($(this).text())
+        });
+      });
+
+
+      function validateForm() {
+        var ok = true;
+
+        var title = document.forms["myForm"]["title"].value;
+        if (title == "") {
+          ok = false;
+          $("#titleHelp").show()
+        } else {
+          $("#titleHelp").hide()
+        }
+        
+        var description = document.forms["myForm"]["description"].value;
+        if (description == "") {
+          ok = false;
+          $("#descriptionHelp").show()
+        } else {
+          $("#descriptionHelp").hide()
+        }
+        
+        var category_name = document.forms["myForm"]["category_name"].value;
+        if (category_name == "") {
+          ok = false;
+          $("#categoryHelp").show()
+        } else {
+          $("#categoryHelp").hide()
+        }
+
+        if (!ok) {
+          $("#alert").show()
+        } else {
+          $("#alert").hide()
+        }
+
+        return ok;
+      }
+    </script>
+    
+    {% if 'username' in session and session['user_id'] == item.user_id %}
+      <div style="text-align: right;">
+        <a href="{{url_for('show_item', category_name = item.category.name, item_title = item.title)}}" class="btn btn-primary">Cancel</a>
+        <input type="submit" value="Save" class="btn btn-danger">
+      </div>
+    {% endif %}
+  </form>
+{% endblock %}

@@ -1,9 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-  {% if 'username' in session %}
-    <a href="{{url_for('new_category')}}" class="btn btn-success">Add a new category</a>
-  {% endif %}
-
+  
   {% with messages = get_flashed_messages() %}
     {% if messages %}
       {% for message in messages %}
@@ -18,24 +15,41 @@
   {% endwith %}
 
   <div class="row" style="margin-top: 12px;">
-    <div class="col-6">
-      <h4>{{ categories_title }}</h4>
+    <div class="col-auto">
+      <h3>Categories</h3>
+
       {% if categories %}
-        {% for c in categories %}
-          <p><a href="{{url_for('show_items', category_name=c.name)}}">{{ c.name }}</a>
-        {% endfor %}
+        <div class="list-group">
+          {% for c in categories %}
+            <a href="{{url_for('show_items', category_name=c.name)}}" 
+              class="list-group-item list-group-item-action {% if category and category.name == c.name %}active{% endif %}">{{ c.name }}</a>
+          {% endfor %}
+        </div>
       {% else %}
         <div class="alert alert-warning" role="alert">
           No Categories Found!
         </div>
       {% endif %}
     </div>
-    <div class="col-6">
-      <h4>{{ items_title }}</h4>
+    <div class="col">
+      <h3 style="display: inline;">{{ items_title }}</h3>
+
+      {% if 'username' in session %}
+        {% if category %}
+          <a href="{{url_for('new_category_item', category_name=category.name)}}" class="btn btn-warning btn-sm add-button">Add Item</a>
+        {% else %}
+          <a href="{{url_for('new_item')}}" class="btn btn-warning btn-sm add-button">Add Item</a>
+        {% endif %}
+      {% endif %}
+
       {% if items %}
-        {% for i in items %}
-          <p><a href="{{url_for('show_item', category_name=i.category.name, item_title=i.title)}}">{{ i.title }}</a> ({{ i.category.name }})</p>
-        {% endfor %}
+        <div class="list-group">
+          {% for i in items %}
+            <a href="{{url_for('show_item', category_name=i.category.name, item_title=i.title)}}"
+            class="list-group-item list-group-item-action">{{ i.title }} 
+              {% if not category %}<em class="text-danger">({{ i.category.name }})</em>{% endif %}</a>
+          {% endfor %}
+        </div>
       {% else %}
         <div class="alert alert-warning" role="alert">
           No Items Found!
