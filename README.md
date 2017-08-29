@@ -28,6 +28,8 @@ So, this application has been developed for an educational purpose.
 - [VirtualBox](https://www.virtualbox.org/)
 - [Python](https://www.python.org/)
 
+We assume that Flask, SQLAlchemy and oauth2client are already installed in the virtual machine.
+
 ## Set Up and run the application
 
 Please follow these steps to set up and run the application.
