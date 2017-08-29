@@ -16,7 +16,7 @@ engine = create_engine("sqlite:///" + DATABASE_NAME)
 # Bind the engine to the metadata of the Base class so that the
 # declaratives can be accessed through a DBSession instance
 Base.metadata.bind = engine
-DBSession = sessionmaker(bind = engine)
+DBSession = sessionmaker(bind=engine)
 
 # A DBSession() instance establishes all conversations with the database
 # and represents a "staging zone" for all the objects loaded into the
@@ -26,7 +26,7 @@ DBSession = sessionmaker(bind = engine)
 # revert all of them back to the last commit by calling
 # session.rollback()
 session = DBSession()
-  
+
 # Create dummy users.
 USERS = [("Alain Boisvert", "ay.boisvert@gmail.com"),
          ("Mathieu Boisvert", "boisvert.my@gmail.com"),
@@ -35,26 +35,27 @@ USERS = [("Alain Boisvert", "ay.boisvert@gmail.com"),
 
 users = []
 for item in USERS:
-  user = User(name = item[0], email = item[1], picture = None)
-  session.add(user)
-  session.commit()
-  users.append(user)
-  print(user)
+    user = User(name=item[0], email=item[1], picture=None)
+    session.add(user)
+    session.commit()
+    users.append(user)
+    print(user)
+
 
 def random_user():
-  pos = randint(0, len(users) - 1)
-  return users[pos] 
+    pos = randint(0, len(users) - 1)
+    return users[pos]
 
-# https://www.eukhost.com/blog/webhosting/how-to-set-up-a-facebook-business-page-a-complete-guide/
+
 # Category and items of that category.
-category1 = Category(name = "Local Business or Place", user = random_user())
+category1 = Category(name="Local Business or Place", user=random_user())
 session.add(category1)
 session.commit()
 print(category1)
 
-values = ["Airport", 
-          "Arts/Entertainment/Nightlife", 
-          "Attractions/Things to Do", 
+values = ["Airport",
+          "Arts/Entertainment/Nightlife",
+          "Attractions/Things to Do",
           "Bank/Financial Services",
           "Bar",
           "Bookshop",
@@ -94,16 +95,17 @@ values = ["Airport",
           "Vehicles"]
 
 for value in values:
-  item = Item(title = value,
-              description = lig.random_para(250), 
-              category = category1,
-              user = random_user())
-  session.add(item)
-  session.commit()
-  print(item)
+    item = Item(title=value,
+                description=lig.random_para(250),
+                category=category1,
+                user=random_user())
+    session.add(item)
+    session.commit()
+    print(item)
 
 # Category and items of that category.
-category2 = Category(name = "Company, Organisation or Institution", user = random_user())
+category2 = Category(name="Company, Organisation or Institution",
+                     user=random_user())
 session.add(category2)
 session.commit()
 print(category2)
@@ -150,16 +152,16 @@ values = ["Aerospace/Defence",
           "University"]
 
 for value in values:
-  item = Item(title = value,
-              description = lig.random_para(250),
-              category = category2,
-              user = random_user())
-  session.add(item)
-  session.commit()
-  print(item)
+    item = Item(title=value,
+                description=lig.random_para(250),
+                category=category2,
+                user=random_user())
+    session.add(item)
+    session.commit()
+    print(item)
 
 # Category and items of that category.
-category3 = Category(name = "Brand or Product", user = random_user())
+category3 = Category(name="Brand or Product", user=random_user())
 session.add(category3)
 session.commit()
 print(category3)
@@ -198,16 +200,16 @@ values = ["App Page",
           "Wine/Spirits"]
 
 for value in values:
-  item = Item(title = value,
-              description = lig.random_para(250),
-              category = category3,
-              user = random_user())
-  session.add(item)
-  session.commit()
-  print(item)
+    item = Item(title=value,
+                description=lig.random_para(250),
+                category=category3,
+                user=random_user())
+    session.add(item)
+    session.commit()
+    print(item)
 
 # Category and items of that category.
-category4 = Category(name = "Artist, Band or Public Figure", user = random_user())
+category4 = Category(name="Artist, Band or Public Figure", user=random_user())
 session.add(category4)
 session.commit()
 print(category4)
@@ -241,16 +243,16 @@ values = ["Actor/Director",
           "Writer"]
 
 for value in values:
-  item = Item(title = value,
-              description = lig.random_para(250),
-              category = category4,
-              user = random_user())
-  session.add(item)
-  session.commit()
-  print(item)
+    item = Item(title=value,
+                description=lig.random_para(250),
+                category=category4,
+                user=random_user())
+    session.add(item)
+    session.commit()
+    print(item)
 
 # Category and items of that category.
-category5 = Category(name = "Entertainment", user = random_user())
+category5 = Category(name="Entertainment", user=random_user())
 session.add(category5)
 session.commit()
 print(category5)
@@ -287,16 +289,16 @@ values = ["Album",
           "TV/Film Award"]
 
 for value in values:
-  item = Item(title = value,
-              description = lig.random_para(250),
-              category = category5,
-              user = random_user())
-  session.add(item)
-  session.commit()
-  print(item)
+    item = Item(title=value,
+                description=lig.random_para(250),
+                category=category5,
+                user=random_user())
+    session.add(item)
+    session.commit()
+    print(item)
 
 # Category and items of that category.
-category6 = Category(name = "Cause or Community", user = random_user())
+category6 = Category(name="Cause or Community", user=random_user())
 session.add(category6)
 session.commit()
 print(category6)

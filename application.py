@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
 #
 # This application provides a list of items within a variety of categories
 # as well as provide a user registration and authentication system.
 # Registered users will have the ability to post, edit and delete their own
 # items.
 # This web app is a project for the Udacity FSWDN
-
 from flask import Flask, render_template, request, redirect, jsonify, url_for
 from flask import flash
 from flask import make_response
@@ -24,8 +24,9 @@ import string
 
 app = Flask(__name__)
 
+GOOGLE_CLIENT_SECRET = "client_secret.json"
 GOOGLE_CLIENT_ID = json.loads(
-    open("client_secrets.json", "r").read())["web"]["client_id"]
+    open(GOOGLE_CLIENT_SECRET, "r").read())["web"]["client_id"]
 
 # Connect to database and create database session.
 engine = create_engine("sqlite:///catalog.db")
@@ -58,7 +59,7 @@ def gconnect():
 
     try:
         # Upgrade the authorization code into a credentials object
-        oauth_flow = flow_from_clientsecrets("client_secrets.json", scope="")
+        oauth_flow = flow_from_clientsecrets(GOOGLE_CLIENT_SECRET, scope="")
         oauth_flow.redirect_uri = "postmessage"
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
@@ -345,7 +346,7 @@ def api_get_categories():
 
 @app.route("/v1/categories/<path:category_name>", methods=["GET"])
 def api_get_category(category_name):
-    """Return a category with his items."""
+    """Return a specific category with his items."""
     category = session.query(Category).filter_by(name=category_name).first()
     if category:
         category = category.serialize
@@ -446,7 +447,7 @@ def new_category_item(category_name):
             item.user_id = login_session["user_id"]
             session.add(item)
             session.commit()
-            flash("Item '{}' Successfully Added".format(item.title))
+            # flash("Item '{}' Successfully Added".format(item.title))
             return redirect(url_for(
                 "show_item", category_name=item.category.name,
                 item_title=item.title))
@@ -539,4 +540,4 @@ def about():
 if __name__ == "__main__":
     app.secret_key = "super_secret_key"
     app.debug = True
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=8000)
