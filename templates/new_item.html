@@ -19,7 +19,7 @@
     <strong>Oups!</strong> Change a few things up and try submitting again.
   </div>
 
-  <form name="myForm" action="{{url_for('new_item', category_name=category_name)}}" method="POST" onsubmit="return validateForm();">
+  <form name="myForm" action="{{url_for('item.new_item', category_name=category_name)}}" method="POST" onsubmit="return validateForm();">
     <div class="form-group">
       <label for="title">Title *</label>
       <input name="title" type="text" size="80" class="form-control" placeholder="Enter title">
@@ -111,7 +111,7 @@
 
     {% if 'username' in session %}
       <div style="text-align: right;">
-        <a href="{{url_for('show_categories')}}" class="btn btn-primary">Cancel</a>
+        <a href="{{url_for('category.show_categories')}}" class="btn btn-primary">Cancel</a>
         <input type="submit" value="Add" class="btn btn-danger">
       </div>
     {% endif %}

@@ -2,10 +2,10 @@
 {% block content %}
   <h2>Edit Item</h2>
   
-  {% with messages = get_flashed_messages() %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-warning alert-dismissible fade show" role="alert" style="margin-top: 1rem;">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" style="margin-top: 1rem;">
           <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -19,7 +19,7 @@
     <strong>Oups!</strong> Change a few things up and try submitting again.
   </div>
 
-  <form name="myForm" action="{{url_for('edit_item', category_name = item.category.name, item_title = item.title)}}" method="POST" onsubmit="return validateForm();">
+  <form name="myForm" action="{{url_for('item.edit_item', category_name = item.category.name, item_title = item.title)}}" method="POST" onsubmit="return validateForm();">
     <div class="form-group">
       <label for="title">Title *</label>
       <input name="title" type="text" size="80" class="form-control" value="{{item.title}}">
@@ -112,7 +112,7 @@
     
     {% if 'username' in session and session['user_id'] == item.user_id %}
       <div style="text-align: right;">
-        <a href="{{url_for('show_item', category_name = item.category.name, item_title = item.title)}}" class="btn btn-primary">Cancel</a>
+        <a href="{{url_for('item.show_item', category_name = item.category.name, item_title = item.title)}}" class="btn btn-primary">Cancel</a>
         <input type="submit" value="Save" class="btn btn-danger">
       </div>
     {% endif %}

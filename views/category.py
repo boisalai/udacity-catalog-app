@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
-from flask import Blueprint
+from flask import Blueprint, render_template
+from sqlalchemy import asc, desc
 from models import Category, Item
+from database import session
 
-categories = Blueprint('categories', __name__)
+category = Blueprint('category', __name__)
 
 
-@categories.route("/")
-@categories.route("/catalog")
+@category.route("/")
+@category.route("/catalog")
 def show_categories():
     """Show all current categories with the latest added items."""
     categories = session.query(Category).order_by(asc(Category.name)).all()

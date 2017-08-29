@@ -21,7 +21,7 @@
       {% if categories %}
         <div class="list-group">
           {% for c in categories %}
-            <a href="{{url_for('show_items', category_name=c.name)}}" 
+            <a href="{{url_for('item.show_items', category_name=c.name)}}" 
               class="list-group-item list-group-item-action {% if category and category.name == c.name %}active{% endif %}">{{ c.name }}</a>
           {% endfor %}
         </div>
@@ -36,16 +36,16 @@
 
       {% if 'username' in session %}
         {% if category %}
-          <a href="{{url_for('new_category_item', category_name=category.name)}}" class="btn btn-warning btn-sm add-button">Add Item</a>
+          <a href="{{url_for('item.new_category_item', category_name=category.name)}}" class="btn btn-warning btn-sm add-button">Add Item</a>
         {% else %}
-          <a href="{{url_for('new_item')}}" class="btn btn-warning btn-sm add-button">Add Item</a>
+          <a href="{{url_for('item.new_item')}}" class="btn btn-warning btn-sm add-button">Add Item</a>
         {% endif %}
       {% endif %}
 
       {% if items %}
         <div class="list-group">
           {% for i in items %}
-            <a href="{{url_for('show_item', category_name=i.category.name, item_title=i.title)}}"
+            <a href="{{url_for('item.show_item', category_name=i.category.name, item_title=i.title)}}"
             class="list-group-item list-group-item-action">{{ i.title }} 
               {% if not category %}<em class="text-danger">({{ i.category.name }})</em>{% endif %}</a>
           {% endfor %}
