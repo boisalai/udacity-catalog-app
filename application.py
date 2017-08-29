@@ -10,9 +10,9 @@ from flask import Flask, render_template, request, redirect, jsonify, url_for
 from flask import flash
 from flask import make_response
 from flask import session as login_session
-from sqlalchemy import create_engine, asc, desc, exc
-from sqlalchemy.orm import sessionmaker
-from models import Base, User, Category, Item
+from sqlalchemy import asc, desc, exc
+from database import session
+from models import User, Category, Item
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
@@ -27,12 +27,6 @@ app = Flask(__name__)
 GOOGLE_CLIENT_SECRET = "client_secret.json"
 GOOGLE_CLIENT_ID = json.loads(
     open(GOOGLE_CLIENT_SECRET, "r").read())["web"]["client_id"]
-
-# Connect to database and create database session.
-engine = create_engine("sqlite:///catalog.db")
-Base.metadata.bind = engine
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
 
 
 @app.route("/login")
@@ -447,7 +441,7 @@ def new_category_item(category_name):
             item.user_id = login_session["user_id"]
             session.add(item)
             session.commit()
-            # flash("Item '{}' Successfully Added".format(item.title))
+            flash("Item '{}' Successfully Added".format(item.title))
             return redirect(url_for(
                 "show_item", category_name=item.category.name,
                 item_title=item.title))
@@ -458,7 +452,8 @@ def new_category_item(category_name):
                 " exists in the database with the same title and category.")
             return redirect(url_for("new_item", category_name=category_name))
     else:
-        categories = session.query(Category).order_by(asc(Category.name)).all()
+        categories = session.query(Category).order_by(
+                        asc(Category.name)).all()
         return render_template(
             "new_item.html", categories=categories,
             category_name=category_name)
@@ -475,6 +470,12 @@ def edit_item(category_name, item_title):
     category = session.query(Category).filter_by(name=category_name).first()
     item = session.query(Item).filter_by(
             category_id=category.id, title=item_title).first()
+
+    if not item:
+        flash("An error occurred. Please try again.", "danger")
+    elif item.user_id != login_session["user_id"]:
+        flash("You are not allowed to edit this item. "
+              "It belongs to {{ item.user.name }}.")
 
     if request.method == "POST":
         if request.form["title"]:
@@ -505,7 +506,8 @@ def edit_item(category_name, item_title):
                 "edit_item", category_name=item.category.name,
                 item_title=item.title))
     else:
-        categories = session.query(Category).order_by(asc(Category.name)).all()
+        categories = session.query(Category).order_by(
+                        asc(Category.name)).all()
         return render_template(
             "edit_item.html", item=item, categories=categories)
 
