@@ -33,13 +33,13 @@ def owner_permission(f):
 
         # Redirect user if category or item does not exist.
         category = session.query(Category).filter_by(
-            name=category_name).first()
+            name=category_name).one_or_none()
         if not category:
             flash("An error occurred. Please try again.", "warning")
             return redirect("/catalog")
 
         item = session.query(Item).filter_by(
-            category_id=category.id, title=item_title).first()
+            category_id=category.id, title=item_title).one_or_none()
         if not item:
             flash("An error occurred. Please try again.", "warning")
             return redirect("/catalog/{}/items".format(category_name))
@@ -63,7 +63,7 @@ def owner_permission(f):
 def show_items(category_name):
     """Show a category and all of his items."""
     categories = session.query(Category).order_by(asc(Category.name)).all()
-    category = session.query(Category).filter_by(name=category_name).first()
+    category = session.query(Category).filter_by(name=category_name).one_or_none()
     items = session.query(Item).filter_by(category_id=category.id).all()
 
     if len(items) < 2:
@@ -82,9 +82,9 @@ def show_items(category_name):
 @item.route("/catalog/<path:category_name>/<path:item_title>")
 def show_item(category_name, item_title):
     """Show a specific item."""
-    category = session.query(Category).filter_by(name=category_name).first()
+    category = session.query(Category).filter_by(name=category_name).one_or_none()
     item = session.query(Item).filter_by(
-        category_id=category.id, title=item_title).first()
+        category_id=category.id, title=item_title).one_or_none()
     return render_template("show_item.html", item=item)
 
 
@@ -108,7 +108,7 @@ def new_category_item(category_name):
         if request.form["category_name"]:
             category_name = request.form["category_name"].strip()
             category = session.query(Category).filter_by(
-                        name=category_name).first()
+                        name=category_name).one_or_none()
             item.category_id = category.id
 
         try:
@@ -158,7 +158,7 @@ def edit_item(category_name, item_title, item=None):
 
         if request.form["category_name"]:
             name = request.form["category_name"].strip()
-            category = session.query(Category).filter_by(name=name).first()
+            category = session.query(Category).filter_by(name=name).one_or_none()
             if category:
                 item.category_id = category.id
             else:
@@ -185,7 +185,7 @@ def edit_item(category_name, item_title, item=None):
                 " exists in the database with the same title and category.",
                 "warning", "warning")
             item = session.query(Item).filter_by(
-                category_id=category.id, title=item_title).first()
+                category_id=category.id, title=item_title).one_or_none()
             return redirect(url_for(
                 "item.edit_item", category_name=item.category.name,
                 item_title=item.title))

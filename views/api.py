@@ -31,7 +31,7 @@ def api_get_categories():
 @api.route("/v1/categories/<path:category_name>", methods=["GET"])
 def api_get_category(category_name):
     """Return a specific category with his items."""
-    category = session.query(Category).filter_by(name=category_name).first()
+    category = session.query(Category).filter_by(name=category_name).one_or_none()
     if category:
         category = category.serialize
         items = [
@@ -47,10 +47,10 @@ def api_get_category(category_name):
     methods=["GET"])
 def api_get_item(category_name, item_title):
     """Return a specific item."""
-    category = session.query(Category).filter_by(name=category_name).first()
+    category = session.query(Category).filter_by(name=category_name).one_or_none()
     if category:
         item = session.query(Item).filter_by(
-            category_id=category.id, title=item_title).first()
+            category_id=category.id, title=item_title).one_or_none()
         if item:
             return jsonify(Item=item.serialize)
     return jsonify(Item=None)
