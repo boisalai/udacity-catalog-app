@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 from flask import Blueprint, jsonify
-from models import Category, Item
+from models.category import Category
+from models.item import Item
 from database import session
 
 api = Blueprint('api', __name__)
@@ -53,4 +54,3 @@ def api_get_item(category_name, item_title):
         if item:
             return jsonify(Item=item.serialize)
     return jsonify(Item=None)
-

@@ -2,30 +2,17 @@
 #
 # Reporting tool that prints out reports (in plain text) based on the
 # data in the database.
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from models import Base, User, Category, Item
-import lorem_ipsum_generator as lig
+from models.user import User
+from models.category import Category
+from models.item import Item
+from database import session, create_db
 from random import randint
+import utils.lorem_ipsum_generator as lig
 
 print("data.py start...")
 
-DATABASE_NAME = "catalog.db"
-engine = create_engine("sqlite:///" + DATABASE_NAME)
-
-# Bind the engine to the metadata of the Base class so that the
-# declaratives can be accessed through a DBSession instance
-Base.metadata.bind = engine
-DBSession = sessionmaker(bind=engine)
-
-# A DBSession() instance establishes all conversations with the database
-# and represents a "staging zone" for all the objects loaded into the
-# database session object. Any change made against the objects in the
-# session won't be persisted into the database until you call
-# session.commit(). If you're not happy about the changes, you can
-# revert all of them back to the last commit by calling
-# session.rollback()
-session = DBSession()
+# Create database.
+create_db()
 
 # Create dummy users.
 USERS = [("Alain Boisvert", "ay.boisvert@gmail.com"),

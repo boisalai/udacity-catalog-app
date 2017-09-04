@@ -2,3 +2,4 @@
 *.db
 Vagrantfile
 *.sh
+*.log

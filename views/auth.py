@@ -5,8 +5,7 @@ from flask import render_template, url_for
 from flask import session as login_session
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
-from models import User
-from database import session
+import views.user as user
 import httplib2
 import json
 import requests
@@ -19,32 +18,6 @@ auth = Blueprint('auth', __name__)
 GOOGLE_CLIENT_SECRET = "client_secret.json"
 GOOGLE_CLIENT_ID = json.loads(
     open(GOOGLE_CLIENT_SECRET, "r").read())["web"]["client_id"]
-
-
-def create_user(login_session):
-    """Create a new user from login session and return his id."""
-    newUser = User(name=login_session["username"],
-                   email=login_session["email"],
-                   picture=login_session["picture"])
-    session.add(newUser)
-    session.commit()
-    user = session.query(User).filter_by(email=login_session["email"]).first()
-    return user.id
-
-
-def get_user_info(user_id):
-    """Return user object from his id."""
-    user = session.query(User).filter_by(id=user_id).first()
-    return user
-
-
-def get_user_id(email):
-    """Return user id from his email."""
-    try:
-        user = session.query(User).filter_by(email=email).first()
-        return user.id
-    except:
-        return None
 
 
 @auth.route("/login")
@@ -105,7 +78,6 @@ def gconnect():
     if result["issued_to"] != GOOGLE_CLIENT_ID:
         response = make_response(
             json.dumps("Token's client ID does not match app's."), 401)
-        print("Token's client ID does not match app's.")
         response.headers["Content-Type"] = "application/json"
         return response
 
@@ -136,9 +108,9 @@ def gconnect():
     login_session["provider"] = "google"
 
     # See if user exists, if it doesn't make a new one.
-    user_id = get_user_id(data["email"])
+    user_id = user.get_user_id(data["email"])
     if not user_id:
-        user_id = create_user(login_session)
+        user_id = user.create_user(login_session)
     login_session["user_id"] = user_id
 
     output = "<h1>Welcome, "
@@ -147,8 +119,9 @@ def gconnect():
     output += '<img src="' + login_session["picture"] + '" '
     output += 'style = "width: 300px; height: 300px; border-radius: 150px; '
     output += '-webkit-border-radius: 150px; -moz-border-radius: 150px;"> '
-    flash("You are now logged in as {}.".format(login_session["username"]))
-    print("done!")
+    flash(
+        "You are now logged in as {}.".format(login_session["username"]),
+        "success")
     return output
 
 
@@ -193,8 +166,8 @@ def fbconnect():
         response.headers["Content-Type"] = "application/json"
         return response
 
+    # Access token received (see access_token).
     access_token = request.data
-    print("Access token received {}.".format(access_token))
 
     app_id = json.loads(open("fb_client_secrets.json", "r")
                         .read())["web"]["app_id"]
@@ -242,9 +215,9 @@ def fbconnect():
     login_session["picture"] = data["data"]["url"]
 
     # See if user exists.
-    user_id = get_user_id(login_session["email"])
+    user_id = user.get_user_id(login_session["email"])
     if not user_id:
-        user_id = create_user(login_session)
+        user_id = user.create_user(login_session)
     login_session["user_id"] = user_id
 
     output = "<h1>Welcome, "
@@ -256,7 +229,7 @@ def fbconnect():
     output += ' " style = "width: 300px; height: 300px;border-radius: 150px;'
     output += ' -webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
 
-    flash("Now logged in as {}.".format(login_session["username"]))
+    flash("Now logged in as {}.".format(login_session["username"]), "success")
     return output
 
 
@@ -294,10 +267,10 @@ def disconnect():
         delete_key_login_session("picture")
         delete_key_login_session("user_id")
         delete_key_login_session("provider")
-        flash("You have successfully been logged out.")
+        flash("You have successfully been logged out.", "success")
         return redirect(url_for("category.show_categories"))
     else:
-        flash("You were not logged in.")
+        flash("You were not logged in.", "success")
         return redirect(url_for("category.show_categories"))
 
 
@@ -305,6 +278,4 @@ def delete_key_login_session(key):
     try:
         del login_session[key]
     except:
-        print(
-            ("An error occured trying to delete login_session "
-             "key='{}'.").format(key))
+        return

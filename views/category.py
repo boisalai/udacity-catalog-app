@@ -2,7 +2,8 @@
 # -*- encoding: utf-8 -*-
 from flask import Blueprint, render_template
 from sqlalchemy import asc, desc
-from models import Category, Item
+from models.category import Category
+from models.item import Item
 from database import session
 
 category = Blueprint('category', __name__)

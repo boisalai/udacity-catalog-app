@@ -4,10 +4,58 @@ from flask import Blueprint, request, render_template, redirect
 from flask import url_for, flash
 from flask import session as login_session
 from sqlalchemy import asc, exc
-from models import Category, Item
+from models.category import Category
+from models.item import Item
 from database import session
+from functools import wraps
 
 item = Blueprint('item', __name__)
+
+
+def login_required(f):
+    """Decorator to redirect user if he or she is not logged."""
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        if "username" not in login_session:
+            return redirect("/login")
+        return f(*args, **kwds)
+    return wrapper
+
+
+def owner_permission(f):
+    """Decorator to make sure the user owns an item
+       before allowing them to edit or delete it.
+    """
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        category_name = kwds["category_name"]
+        item_title = kwds["item_title"]
+
+        # Redirect user if category or item does not exist.
+        category = session.query(Category).filter_by(
+            name=category_name).first()
+        if not category:
+            flash("An error occurred. Please try again.", "warning")
+            return redirect("/catalog")
+
+        item = session.query(Item).filter_by(
+            category_id=category.id, title=item_title).first()
+        if not item:
+            flash("An error occurred. Please try again.", "warning")
+            return redirect("/catalog/{}/items".format(category_name))
+
+        # Make sure the user owns an item before allowing them to edit
+        # or delete it.
+        if "username" not in login_session\
+                or "user_id" in login_session\
+                and item.user_id != login_session["user_id"]:
+            flash("You are not allowed to edit or delete this item. "
+                  "It belongs to {}.".format(item.user.name), "warning")
+            return render_template("show_item.html", item=item)
+
+        kwds['item'] = item
+        return f(*args, **kwds)
+    return wrapper
 
 
 @item.route("/catalog/<path:category_name>")
@@ -40,20 +88,17 @@ def show_item(category_name, item_title):
     return render_template("show_item.html", item=item)
 
 
+@login_required
 @item.route("/catalog/items/new", methods=["GET", "POST"])
 def new_item():
     """Add a new item without presetting a category."""
-    if "username" not in login_session:
-        return redirect("/login")
     return new_category_item(None)
 
 
+@login_required
 @item.route("/catalog/<path:category_name>/items/new", methods=["GET", "POST"])
 def new_category_item(category_name):
     """Add a new item."""
-    if "username" not in login_session:
-        return redirect("/login")
-
     if request.method == "POST":
         item = Item()
         if request.form["title"]:
@@ -78,7 +123,7 @@ def new_category_item(category_name):
             session.rollback()
             flash(
                 "You can not add this item since another item already "
-                " exists in the database with the same title and category.", 
+                " exists in the database with the same title and category.",
                 "warning")
             return redirect(url_for(
                 "item.new_item", category_name=category_name))
@@ -93,33 +138,10 @@ def new_category_item(category_name):
 @item.route(
     "/catalog/<path:category_name>/<path:item_title>/edit",
     methods=["GET", "POST"])
-def edit_item(category_name, item_title):
+@login_required
+@owner_permission
+def edit_item(category_name, item_title, item=None):
     """Edit a item."""
-    if "username" not in login_session:
-        return redirect("/login")
-
-    category = session.query(Category).filter_by(name=category_name).first()
-    if category:
-        item = session.query(Item).filter_by(
-                category_id=category.id, title=item_title).first()
-
-    if not item:
-        flash("An error occurred. Please try again.", "warning")
-        categories = session.query(Category).order_by(
-                        asc(Category.name)).all()
-        return render_template(
-            "edit_item.html", item=item, categories=categories)
-    
-    # 20170829: We must make sure the user owns an item before allowing 
-    # them to edit it.
-    if item.user_id != login_session["user_id"]:
-        flash("You are not allowed to edit this item. "
-              "It belongs to {{ item.user.name }}.", "warning")
-        categories = session.query(Category).order_by(
-                        asc(Category.name)).all()
-        return render_template(
-            "edit_item.html", item=item, categories=categories)
-
     if request.method == "POST":
         if request.form["title"]:
             item.title = request.form["title"].strip()
@@ -151,7 +173,7 @@ def edit_item(category_name, item_title):
             session.add(item)
             session.commit()
             flash(
-                "Item '{}' Successfully Edited".format(item.title), 
+                "Item '{}' Successfully Edited".format(item.title),
                 "success")
             return redirect(url_for(
                 "item.show_item", category_name=item.category.name,
@@ -160,7 +182,7 @@ def edit_item(category_name, item_title):
             session.rollback()
             flash(
                 "You can not update this item since another item already "
-                " exists in the database with the same title and category.", 
+                " exists in the database with the same title and category.",
                 "warning", "warning")
             item = session.query(Item).filter_by(
                 category_id=category.id, title=item_title).first()
@@ -177,22 +199,10 @@ def edit_item(category_name, item_title):
 @item.route(
     "/catalog/<path:category_name>/<path:item_title>/delete",
     methods=["GET", "POST"])
-def delete_item(category_name, item_title):
+@login_required
+@owner_permission
+def delete_item(category_name, item_title, item=None):
     """Delete a item."""
-    if "username" not in login_session:
-        return redirect("/login")
-
-    category = session.query(Category).filter_by(name=category_name).first()
-    item = session.query(Item).filter_by(
-            category_id=category.id, title=item_title).first()
-
-    # 20170829: We must make sure the user owns an item before allowing 
-    # them to delete it.
-    if item.user_id != login_session["user_id"]:
-        flash("You are not allowed to delete this item. "
-              "It belongs to {{ item.user.name }}.", "warning")
-        return render_template("show_item.html", item=item)
-
     if request.method == "POST":
         session.delete(item)
         session.commit()
